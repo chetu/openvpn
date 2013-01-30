@@ -36,11 +36,12 @@ sw_ovpn_server_setup()
  source ./vars
  ./build-ca
  ./build-key-server server
- cp -f keys/{ca.crt,ca.key,server.crt,server.key} /etc/openvpn/
+ cp -f /etc/openvpn/easy-rsa/2.0/keys/{ca.crt,ca.key,server.crt,server.key} /etc/openvpn/
  ./build-dh
- cp -f keys/dh1024.pem /etc/openvpn/ 
+ cp -f /etc/openvpn/easy-rsa/2.0/keys/dh1024.pem /etc/openvpn/ 
  /etc/init.d/openvpn restart
 }
+
 var_gen()
 {
 country=$1
@@ -53,32 +54,31 @@ keyou=$7
 pkcpath=$8
 pkcpin=$9
 
-echo -e  "
-export EASY_RSA="`pwd`"
-export OPENSSL="openssl"
+echo   "
+#! /bin/bash
+export OPENSSL="/usr/bin/openssl"
 export PKCS11TOOL="pkcs11-tool"
 export GREP="grep"
-export KEY_CONFIG=`$EASY_RSA/whichopensslcnf $EASY_RSA`
-export KEY_DIR="$EASY_RSA/keys"
+export KEY_CONFIG="/etc/openvpn/easy-rsa/2.0/openssl-0.9.8.cnf"
+export KEY_DIR="/etc/openvpn/easy-rsa/2.0/keys"
 export PKCS11_MODULE_PATH="dummy"
 export PKCS11_PIN="dummy"
 export KEY_SIZE=1024
-export CA_EXPIRE=3650
-export KEY_EXPIRE=3650
+export CA_EXPIRE=365
+export KEY_EXPIRE=365 
 
 export KEY_COUNTRY="$country"
 export KEY_PROVINCE="$state"
 export KEY_CITY="$city"
 export KEY_ORG="$org"
 export KEY_EMAIL="$email"
-export KEY_EMAIL=$email
-export KEY_CN=$keycn
-export KEY_NAME=$keyou
+export KEY_CN=`od -vAn -N4 -tu4 < /dev/urandom |xargs`
+export KEY_NAME="$keyou-simplewall"
 export KEY_OU=$keyou
 #export PKCS11_MODULE_PATH=$pkcpath
 #export PKCS11_PIN=$pkcpin
 "
 }
+
 var_gen $1 $2 $3 $4 $5 $6 $7 >/etc/openvpn/easy-rsa/2.0/vars
 sw_ovpn_server_setup
-
