@@ -1,6 +1,6 @@
 #! /bin/bash
 # All Rights Reserved
-# Author: Chetan Muneshwar
+# Chetan Muneshwar
 # Free to use. No garranty. Not responsible for side effects.
 sw_opvn_client_setup()
 {
