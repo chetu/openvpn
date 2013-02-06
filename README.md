@@ -1,7 +1,6 @@
-Copy easy-rsa  folder to /etc/openvpn
+Its tested on centos 5
 
-
-cp -R /usr/share/doc/openvpn-2.x.x/easy-rsa/ /etc/openvpn/
+This script need modified easy-rsa script part. Extract the openvpn_easy_rsa_modified_scripts.tar.gz and carry on
 
 
 next copy shell script from git 

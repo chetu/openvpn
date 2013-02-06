@@ -34,6 +34,9 @@ sw_ovpn_server_setup()
  chmod +rwx *
  ./clean-all  
  source ./vars
+
+
+
  ./build-ca
  ./build-key-server server
  cp -f /etc/openvpn/easy-rsa/2.0/keys/{ca.crt,ca.key,server.crt,server.key} /etc/openvpn/
