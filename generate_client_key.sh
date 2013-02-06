@@ -1,11 +1,12 @@
 #! /bin/bash
-# Simplewall All Rights Reserved
+# All Rights Reserved
 # Author: Chetan Muneshwar
+# Free to use. No garranty. Not responsible for side effects.
 sw_opvn_client_setup()
 {
 CLIENT_NAME=$1
 rm -rf keys/$CLIENT_NAME.*
-./build-key $CLIENT_NAME
+./build-key-pass $CLIENT_NAME
 
 touch keys/$CLIENT_NAME.window.ovpn
 touch keys/$CLIENT_NAME.linux_mac.ovpn
@@ -13,12 +14,12 @@ touch keys/$CLIENT_NAME.passwd
 
 cd keys/
 
-vpn_ip="`sqlite /usr/local/apache2/htdocs/simplewall/systemcomponent/simplewall.s3db 'select eth1_address from tbl_device'|xargs`"
-vpn_password="`sqlite /usr/local/apache2/htdocs/simplewall/systemcomponent/simplewall.s3db "select password from tbl_vpn_users where username='$CLIENT_NAME'"|xargs`"
-vpn_ptrl="`sqlite /usr/local/apache2/htdocs/simplewall/systemcomponent/simplewall.s3db 'select protocol from tbl_vpn_settings;'|xargs`"
-vpn_protocol="`echo $vpn_ptrl | tr '[:upper:]' '[:lower:]'`"
-vpn_port="`sqlite /usr/local/apache2/htdocs/simplewall/systemcomponent/simplewall.s3db 'select port from tbl_vpn_settings;'|xargs`"
-vpn_auth="`sqlite /usr/local/apache2/htdocs/simplewall/systemcomponent/simplewall.s3db 'select mode from tbl_vpn_auth;' |xargs`"
+vpn_ip=""
+vpn_password=""
+vpn_ptrl=""
+vpn_protocol=""
+vpn_port=""
+vpn_auth=""
 
 
 echo -e "$CLIENT_NAME" >$CLIENT_NAME.passwd
@@ -78,15 +79,24 @@ else
  zip $CLIENT_NAME.zip $CLIENT_NAME.window.ovpn $CLIENT_NAME.linux_mac.ovpn ca.crt $CLIENT_NAME.crt $CLIENT_NAME.key CLIENT.README $CLIENT_NAME.passwd
 fi
 
-openvpn_cl="/usr/local/apache2/htdocs/simplewall/systemcomponent/openvpn/client_keys"
+openvpn_cl="/etc/openvpn/cl_keys"
 if [ -d $openvpn_cl ]  ; then 
- rsync -avz $CLIENT_NAME.zip /usr/local/apache2/htdocs/simplewall/systemcomponent/openvpn/client_keys/
+ rsync -avz $CLIENT_NAME.zip /etc/openvpn/cl_keys
 else
  
- mkdir -p /usr/local/apache2/htdocs/simplewall/systemcomponent/openvpn/client_keys
- rsync -avz $CLIENT_NAME.zip /usr/local/apache2/htdocs/simplewall/systemcomponent/openvpn/client_keys/
+ mkdir -p /etc/openvpn/cl_keys
+ rsync -avz $CLIENT_NAME.zip /etc/openvpn/cl_keys
 fi
 }
 
 export KEY_CN=`od -vAn -N4 -tu4 < /dev/urandom |xargs`
-sw_opvn_client_setup $1
+if [ $# -lt 2 ] ; then
+	echo "Usage need two arguments clientname clientpasswd"
+else
+	sw_opvn_client_setup $1
+	echo "Please enter client passwd again"
+	read clientpasswd
+	
+	vpn_password=$clientpasswd
+fi
+
